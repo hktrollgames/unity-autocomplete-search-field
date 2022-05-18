@@ -137,7 +137,6 @@ GameObject:
   - component: {fileID: 372644633}
   - component: {fileID: 372644632}
   - component: {fileID: 372644631}
-  - component: {fileID: 372644630}
   m_Layer: 5
   m_Name: Button (Legacy)
   m_TagString: Untagged
@@ -166,29 +165,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &372644630
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 372644628}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a6b28014985d5ff4085c4ecf097df16f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  potionResult:
-    name: 2132
-    amount: 1
-    unit: 0
-  potionIngredients:
-  - name: f
-    amount: 0
-    unit: 0
-  - name: sdf
-    amount: 2
-    unit: 0
 --- !u!114 &372644631
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -202,7 +178,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target:
-    _: 9
+    _: 1
 --- !u!114 &372644632
 MonoBehaviour:
   m_ObjectHideFlags: 0

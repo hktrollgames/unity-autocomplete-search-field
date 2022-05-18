@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
@@ -80,8 +80,15 @@ public class UIEventListDrawerDrawer : PropertyDrawer
             }
             groupMenuNames[key].Add(new Tuple<string, UIButtonType>(displayName, item.type));
         }
+
+
+        selectIcon = (Texture)EditorGUIUtility.Load("list.png");
+        searchIcon = (Texture)EditorGUIUtility.Load("search.png");
     }
 
+
+    Texture selectIcon;
+    Texture searchIcon;
     Rect elementRect;
 
     float searchIconWidth = 18;
@@ -121,13 +128,13 @@ public class UIEventListDrawerDrawer : PropertyDrawer
         {
             Rect selectIconRect = new Rect(rect.x + rect.width, rect.y, selectIconWidth, lineHeight);
 
-            if (GUI.Button(selectIconRect, "?"))
+            if (GUI.Button(selectIconRect, selectIcon))
             {
                 mode = ViewMode.SelectUI;
             }
             Rect searchIconRect = new Rect(selectIconRect.x + selectIconRect.width, selectIconRect.y, searchIconWidth, lineHeight);
 
-            if (GUI.Button(searchIconRect, "?"))
+            if (GUI.Button(searchIconRect, searchIcon))
             {
                 mode = ViewMode.SearchUI;
             }
@@ -267,7 +274,7 @@ public class UIEventListDrawerDrawer : PropertyDrawer
         autocompleteSearchField.ClearResults();
         mode = ViewMode.DropDownUI;
     }
-
+    
     public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
     {
         float defaultHeight = EditorGUI.GetPropertyHeight(property, label, true);

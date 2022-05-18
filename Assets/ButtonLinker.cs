@@ -1,5 +1,6 @@
-using System;
+﻿using System;
 using UnityEngine;
+using UnityEngine.UI;
 
 public enum UIButtonType
 {
@@ -31,4 +32,12 @@ public class UIEventList
 public class ButtonLinker : MonoBehaviour
 {
     public UIEventList target;
+
+    private void Start()
+    {
+        Button button = GetComponent<Button>();
+        if (button == null)
+            button = gameObject.AddComponent<Button>();
+        button.onClick.AddListener(()=> Debug.Log(target._ + " Clicked"));
+    }
 }
