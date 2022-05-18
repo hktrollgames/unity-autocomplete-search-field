@@ -11,7 +11,7 @@ public class UIEventListDrawerDrawer : PropertyDrawer
 
     const int lineHeight = 18;
     const int groupInterval = 8;
-    const int margin = 4;  // 그룹좌우 상하 좌우 여백
+    const int margin = 4;           // group border margin
 
     [SerializeField]
     AutocompleteSearchField.AutocompleteSearchField autocompleteSearchField;
@@ -53,7 +53,6 @@ public class UIEventListDrawerDrawer : PropertyDrawer
         foreach (var item in menuType.enumDisplayNames)
         {
             enumNames.Add(new EnumInfo(item.ToString()));
-            Debug.Log(item);
         }
 
         int i = 0;
@@ -85,67 +84,94 @@ public class UIEventListDrawerDrawer : PropertyDrawer
 
     Rect elementRect;
 
-    bool showSelectUI = false;
     float searchIconWidth = 18;
     float selectIconWidth = 18;
+
+    public enum ViewMode
+    {
+        DropDownUI,
+        SelectUI,
+        SearchUI
+    }
+    ViewMode mode;
     public override void OnGUI(Rect rect, SerializedProperty property, GUIContent label)
     {
-
         EditorGUI.BeginProperty(rect, label, property);
+
+        Init(property);
 
 
         rect.width -= (selectIconWidth + searchIconWidth);
         rect = EditorGUI.PrefixLabel(rect, GUIUtility.GetControlID(FocusType.Passive), label);
+        rect.height = lineHeight;
 
+        OnDropdownGUI(rect, property);
+
+        if (mode != ViewMode.DropDownUI)
         {
-            Rect selectIconRect = new Rect(rect.x + rect.width, rect.y, selectIconWidth, lineHeight);
-            if (GUI.Button(selectIconRect, "S"))
+            rect.y += lineHeight;
+            if (GUI.Button(rect, "Close"))
             {
-                Debug.Log("선택버튼 누름");
+                mode = ViewMode.DropDownUI;
+                uiHeight = 0;
             }
         }
 
+        if (mode == ViewMode.DropDownUI)
+        {
+            Rect selectIconRect = new Rect(rect.x + rect.width, rect.y, selectIconWidth, lineHeight);
+
+            if (GUI.Button(selectIconRect, "?"))
+            {
+                mode = ViewMode.SelectUI;
+            }
+            Rect searchIconRect = new Rect(selectIconRect.x + selectIconRect.width, selectIconRect.y, searchIconWidth, lineHeight);
+
+            if (GUI.Button(searchIconRect, "?"))
+            {
+                mode = ViewMode.SearchUI;
+            }
+        }
+
+        switch (mode)
+        {
+            case ViewMode.SelectUI:
+                OnSelectGUI(rect);
+                break;
+            case ViewMode.SearchUI:
+                OnSearchGUI(rect);
+                break;
+        }
+
+
+        EditorGUI.EndProperty();
+    }
+
+    private void OnDropdownGUI(Rect rect, SerializedProperty property)
+    {
         var dropdownRect = rect;
         dropdownRect.height = lineHeight;
         var menuTypePp = property.FindPropertyRelative("_");
+        if (menuTypePp == null)
+            return;
         EditorGUI.PropertyField(dropdownRect, menuTypePp);
+    }
 
+    private void OnSearchGUI(Rect rect)
+    {
         rect.y += lineHeight;
-
-        Init(property);
-        Rect lRect = rect;
-        Rect rRect = rect;
-        rRect.width = lRect.width = lRect.width * 0.5f;
-        rRect.x += rRect.width;
-        lRect.height = lineHeight;
-
-        if (GUI.Button(lRect, showSelectUI ? "Close" : "Select"))
-        {
-            showSelectUI = !showSelectUI;
-            if (showSelectUI == false)
-                uiHeight = 0;
-        }
-
-        OnSelectGUI(rect);
-
         var current = Event.current;
         var eventType = current.type;
-        autocompleteSearchField.DoSearchField(rRect, true);
+        autocompleteSearchField.DoSearchField(rect, true);
         current.type = eventType;
 
-        rRect.y += lineHeight;
-        elementRect = autocompleteSearchField.DoResults(rRect);
+        rect.y += lineHeight;
+        elementRect = autocompleteSearchField.DoResults(rect);
         elementRect.y -= lineHeight;
-        EditorGUI.EndProperty();
     }
 
     private void OnSelectGUI(Rect rect)
     {
-        if (showSelectUI == false)
-        {
-            return;
-        }
-
         rect.height = lineHeight;
         rect.width -= margin;
         float halfMargin = margin * 0.5f;
@@ -162,7 +188,6 @@ public class UIEventListDrawerDrawer : PropertyDrawer
             boxRect.height = (groupItem.Value.Count + 1) * lineHeight + halfMargin;
             boxRect.width += margin;
 
-            //그룹 요소가 한개인 경우 이름을 그룹이름을 같이 표시하자.
             string groupName = groupItem.Key;
             bool isOnlyOneItem = groupItem.Value.Count == 1;
             string prefix = null;
@@ -182,7 +207,7 @@ public class UIEventListDrawerDrawer : PropertyDrawer
                     return;
             }
 
-            rect.y += groupInterval; // 그룹간의 간격
+            rect.y += groupInterval;
         }
         uiHeight = rect.y;
 
@@ -205,8 +230,8 @@ public class UIEventListDrawerDrawer : PropertyDrawer
         string buttonDisplayName = prefix += item.Item1;
         if (GUI.Button(rect, buttonDisplayName))
         {
-            Debug.Log($"{item.Item2} Click");
-            showSelectUI = false;
+            //Debug.Log($"{item.Item2} Click");
+            mode = ViewMode.DropDownUI;
             uiHeight = 0;
             Select(item.Item2);
             return true;
@@ -215,11 +240,6 @@ public class UIEventListDrawerDrawer : PropertyDrawer
     }
     Dictionary<string, List<Tuple<string, UIButtonType>>> groupMenuNames = new Dictionary<string, List<Tuple<string, UIButtonType>>>();
 
-
-    public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
-    {
-        return elementRect.y + uiHeight;
-    }
 
     void OnInputChanged(string searchString)
     {
@@ -245,5 +265,22 @@ public class UIEventListDrawerDrawer : PropertyDrawer
     {
         menuType.enumValueIndex = (int)selected;
         autocompleteSearchField.ClearResults();
+        mode = ViewMode.DropDownUI;
+    }
+
+    public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+    {
+        float defaultHeight = EditorGUI.GetPropertyHeight(property, label, true);
+        switch (mode)
+        {
+            case ViewMode.DropDownUI:
+                return defaultHeight;
+            case ViewMode.SelectUI:
+                return defaultHeight + uiHeight;
+            case ViewMode.SearchUI:
+                return defaultHeight + elementRect.y;
+        }
+
+        return defaultHeight;
     }
 }
