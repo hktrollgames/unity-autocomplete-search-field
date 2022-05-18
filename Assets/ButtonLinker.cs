@@ -3,16 +3,16 @@ using UnityEngine;
 
 public enum UIButtonType
 {
-    [InspectorName("Close UI")]
-    CloseUI,
     [InspectorName("Inven/Buy")]
     InvenBuy,
-    [InspectorName("Inven/EnchantInspectorName")]
+    [InspectorName("Inven/Enchant")]
     InvenEnchant,
     [InspectorName("Shop/Buy")]
     ShopBuy,
     [InspectorName("Shop/Sell")]
     ShopSell,
+    [InspectorName("Close UI")]
+    CloseUI,
     test1,
     test2,
     test3,
@@ -22,7 +22,6 @@ public enum UIButtonType
     Contact,
 }
 
-//public class UIEventList : PropertyAttribute { }
 [Serializable]
 public class UIEventList
 {
@@ -31,6 +30,5 @@ public class UIEventList
 
 public class ButtonLinker : MonoBehaviour
 {
-    public UIEventList targetEvent;
-    public string test;
+    public UIEventList target;
 }
