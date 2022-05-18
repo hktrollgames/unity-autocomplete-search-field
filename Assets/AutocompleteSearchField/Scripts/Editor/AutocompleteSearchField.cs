@@ -77,13 +77,20 @@ namespace AutocompleteSearchField
 		{
 			var rect = GUILayoutUtility.GetRect(1, 1, 18, 18, GUILayout.ExpandWidth(true));
 			GUILayout.BeginHorizontal();
+
+			var current = Event.current;
+			if (current.type == EventType.MouseDown)
+			{
+				Debug.Log("Mouse Down");
+			}
+
 			DoSearchField(rect, asToolbar);
 			GUILayout.EndHorizontal();
 			rect.y += 18;
 			DoResults(rect);
 		}
 
-		void DoSearchField(Rect rect, bool asToolbar)
+		public void DoSearchField(Rect rect, bool asToolbar)
 		{
 			if(searchField == null)
 			{
@@ -104,11 +111,11 @@ namespace AutocompleteSearchField
 
 			searchString = result;
 
-			if(HasSearchbarFocused())
-			{
-				RepaintFocusedWindow();
-			}
-		}
+            if (HasSearchbarFocused())
+            {
+                RepaintFocusedWindow();
+            }
+        }
 
 		void OnDownOrUpArrowKeyPressed()
 		{
@@ -131,14 +138,22 @@ namespace AutocompleteSearchField
 			else if (selectedIndex < 0) selectedIndex = -1;
 		}
 
-		void DoResults(Rect rect)
+		public Rect DoResults(Rect rect)
 		{
-			if(results.Count <= 0 || !showResults) return;
+			if (results.Count <= 0 || !showResults)
+			{
+				rect.height = Styles.resultHeight;
+				return rect;
+			}
 
 			var current = Event.current;
+			//if(current.type == EventType.MouseDown)
+   //         {
+			//	Debug.Log("Mouse Down");
+   //         }
 			rect.height = Styles.resultHeight * Mathf.Min(maxResults, results.Count);
-			rect.x = Styles.resultsMargin;
-			rect.width -= Styles.resultsMargin * 2;
+			//rect.x = Styles.resultsMargin;
+			//rect.width -= Styles.resultsMargin * 2;
 
 			var elementRect = rect;
 
@@ -208,13 +223,14 @@ namespace AutocompleteSearchField
 			{
 				previousMousePosition = current.mousePosition;
 			}
+			return elementRect;
 		}
 
 		void OnConfirm(string result)
 		{
 			searchString = result;
 			if(onConfirm != null) onConfirm(result);
-			if(onInputChanged != null) onInputChanged(result);
+			//if(onInputChanged != null) onInputChanged(result);
 			RepaintFocusedWindow();
 			GUIUtility.keyboardControl = 0; // To avoid Unity sometimes not updating the search field text
 		}
